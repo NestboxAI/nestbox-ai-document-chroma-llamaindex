@@ -1,0 +1,39 @@
+{
+  "name": "nestbox-ai-document-chroma-llamaindex",
+  "version": "1.0.0",
+  "description": "Document API with ChromaDB and LlamaIndex",
+  "main": "index.js",
+  "repository": "https://github.com/NestboxAI/nestbox-ai-document-chroma-llamaindex.git",
+  "author": "Roy Ganor <ganoro@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc --project tsconfig.build.json",
+    "lint": "eslint . --ext .ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@llamaindex/workflow": "^0.0.8",
+    "chromadb": "^1.10.3",
+    "chromadb-default-embed": "^2.13.2",
+    "dotenv": "^16.4.5",
+    "llamaindex": "^0.8.31",
+    "nestbox-ai-model-base": "github:NestboxAI/nestbox-ai-model-base#main",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "@types/jest": "^28.0.0",
+    "@types/node": "^18.0.0",
+    "@types/prettier": "^3.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^28.0.0",
+    "ts-jest": "^28.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.2"
+  }
+
+}
