@@ -105,7 +105,6 @@ RUN useradd -m -u 1001 -g nodejs nestjs
 
 # Copy only the necessary files
 COPY --chown=nestjs:nodejs --from=build /app/nestbox-ai-document-chroma-llamaindex/node_modules node_modules
-COPY --chown=nestjs:nodejs nestbox-ai-document-chroma-llamaindex/agent.json .
 
 RUN export GIN_MODE=release
 RUN pip install chromadb
