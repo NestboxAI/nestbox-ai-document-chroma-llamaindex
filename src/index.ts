@@ -1,4 +1,4 @@
-import { bootstrap, setVectorHandler, setParserHandler, ParserHandler, VectorHandler } from 'nestbox-ai-document-base';
+import { bootstrap, setVectorHandler, setParserHandler } from 'nestbox-ai-document-base';
 
 import { ChromaVectorHandler } from './chromaDbVectorHandler';
 import { LlamaIndexParseHandler } from './llamaindexPraserHandler';
