@@ -69,13 +69,13 @@ export class ChromaVectorHandler implements VectorHandler {
     return keysToDelete.length;
   }
 
-  async similaritySearch(collectionId: string, query: string, top_k = 10, filter?: object): Promise<{ results: object[] }> {
+  async similaritySearch(collectionId: string, query: string, topK = 10, filter?: object, include?: string[]): Promise<any[]> {
     const docs = Object.values(this.collections[collectionId]?.documents || {});
 
     if (docs.length > 0) {
-      return { results: [docs[0]] };
+      return [docs[0]];
     }
 
-    return { results: [{ id: 'sample', content: 'Sample text', metadata: {} }] };
+    return [{ id: 'sample', content: 'Sample text', metadata: {} }];
   }
 }

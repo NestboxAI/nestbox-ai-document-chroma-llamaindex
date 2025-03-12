@@ -7320,7 +7320,7 @@ neo-async@^2.6.2:
 
 "nestbox-ai-document-base@github:NestboxAI/nestbox-ai-document-base#main":
   version "0.0.1"
-  resolved "https://codeload.github.com/NestboxAI/nestbox-ai-document-base/tar.gz/375a5f0d63eb509b7ce17e17e8db1eec7b2d69fc"
+  resolved "https://codeload.github.com/NestboxAI/nestbox-ai-document-base/tar.gz/9fc9652aa6d6602709a59e6c660e3227eaf20209"
   dependencies:
     "@nestjs/common" "^10.0.0"
     "@nestjs/core" "^10.0.0"

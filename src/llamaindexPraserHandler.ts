@@ -1,4 +1,4 @@
-import { ParserHandler } from 'nestbox-ai-document-base'
+import { ParseHandler } from 'nestbox-ai-document-base'
 
 // Stub implementation of ParseHandler
 export class LlamaIndexParseHandler implements ParseHandler {
