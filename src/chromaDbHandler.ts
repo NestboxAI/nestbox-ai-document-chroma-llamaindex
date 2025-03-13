@@ -1,7 +1,7 @@
 import { ChromaClient, Collection, IncludeEnum } from 'chromadb';
 import { VectorHandler } from 'nestbox-ai-document-base';
 
-export class ChromaVectorDB implements VectorHandler {
+export class ChromaDbHandler implements VectorHandler {
   private client: ChromaClient;
 
   constructor(config?: object) {
