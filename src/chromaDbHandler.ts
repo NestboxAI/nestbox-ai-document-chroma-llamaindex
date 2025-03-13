@@ -52,7 +52,6 @@ export class ChromaDbHandler implements VectorHandler {
   ): Promise<string> {
     const { id, document, url, type, metadata } = data;
     try {
-      console.log('Inserting vector into collection', collectionId);
       const collection: Collection = await this.client.getCollection({
         name: collectionId,
       } as any);
@@ -60,25 +59,20 @@ export class ChromaDbHandler implements VectorHandler {
       const vectorId =
         id ?? `vec-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-      console.log('Inserting vector with ID', vectorId);
       // Merge url and type into metadata (metadata can be any object)
       const fullMetadata: any = metadata ? { ...metadata } : {};
       if (url) fullMetadata.url = url;
       if (type) fullMetadata.type = type;
 
-      console.log('Inserting vector with metadata', fullMetadata);
-
       // Prepare parameters for adding. Only include fields that are present.
-      const addParams: any = { ids: vectorId };
-      if (document !== undefined) addParams.documents = document;
-      if (Object.keys(fullMetadata).length > 0)
-        addParams.metadatas = fullMetadata;
+      const addParams: any = { ids: [vectorId] };
+      if (document !== undefined) addParams.documents = [document];
+      if (Object.keys(fullMetadata).length > 0) {
+        addParams.metadatas = [fullMetadata];
+      }
       
       console.log('Inserting vector with parameters', addParams);
-
       await collection.add(addParams);
-      console.log('Vector inserted successfully');
-      
       return vectorId;
     } catch (err: any) {
       throw new Error(
