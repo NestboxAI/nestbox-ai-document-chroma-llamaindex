@@ -104,6 +104,7 @@ RUN groupadd -g 1001 nodejs
 RUN useradd -m -u 1001 -g nodejs nestjs
 
 # Copy only the necessary files
+COPY --chown=nestjs:nodejs --from=build /app/dist dist
 COPY --chown=nestjs:nodejs --from=build /app/node_modules node_modules
 
 RUN export GIN_MODE=release
