@@ -18,7 +18,7 @@ RUN adduser -S nestjs -u 1001
 COPY --chown=nestjs:nodejs . .
 
 # Install dependencies model 
-WORKDIR /app/nestbox-ai-document-chroma-llamaindex
+WORKDIR /app
 RUN yarn --frozen-lockfile
 
 # Set Docker as a non-root user
@@ -44,9 +44,9 @@ COPY --chown=nestjs:nodejs . .
 
 # In order to run `yarn build` we need access to the Nest CLI.
 # Nest CLI is a dev dependency.
-COPY --chown=nestjs:nodejs --from=dev /app/nestbox-ai-document-chroma-llamaindex/node_modules ./nestbox-ai-document-chroma-llamaindex/node_modules
+COPY --chown=nestjs:nodejs --from=dev /app/node_modules ./node_modules
 
-WORKDIR /app/nestbox-ai-document-chroma-llamaindex
+WORKDIR /app
 RUN yarn build
 
 # Set Docker as a non-root user
@@ -104,7 +104,7 @@ RUN groupadd -g 1001 nodejs
 RUN useradd -m -u 1001 -g nodejs nestjs
 
 # Copy only the necessary files
-COPY --chown=nestjs:nodejs --from=build /app/nestbox-ai-document-chroma-llamaindex/node_modules node_modules
+COPY --chown=nestjs:nodejs --from=build /app/node_modules node_modules
 
 RUN export GIN_MODE=release
 RUN pip install chromadb
