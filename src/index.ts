@@ -1,10 +1,9 @@
 import { bootstrap, setVectorHandler, setParserHandler } from 'nestbox-ai-document-base';
 
-import { ChromaVectorHandler } from './chromaDbVectorHandler';
-import { LlamaIndexParseHandler } from './llamaindexPraserHandler';
+import { ChromaDbHandler } from './chromaDbHandler';
+import { LlamaIndexParserHandler } from './llamaindexPraserHandler';
 
-setVectorHandler(new ChromaVectorHandler());
-setParserHandler(new LlamaIndexParseHandler());
-
+setVectorHandler(new ChromaDbHandler());
+setParserHandler(new LlamaIndexParserHandler());
 
 bootstrap();
