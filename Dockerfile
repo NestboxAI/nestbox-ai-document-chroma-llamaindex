@@ -1,7 +1,7 @@
 #
 # 🧑‍💻 Development
 #
-FROM node:18-alpine as dev
+FROM node:20-alpine as dev
 # add the missing shared libraries from alpine base image
 RUN apk add --no-cache libc6-compat
 # Create app folder
@@ -27,7 +27,7 @@ USER node
 #
 # 🏡 Production Build
 #
-FROM node:18-alpine as build
+FROM node:20-alpine as build
 
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
