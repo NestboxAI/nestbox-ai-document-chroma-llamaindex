@@ -17,7 +17,7 @@ export class ChromaDbHandler implements VectorHandler {
       this.client = new ChromaClient(config || {});
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -33,7 +33,7 @@ export class ChromaDbHandler implements VectorHandler {
       });
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -46,7 +46,7 @@ export class ChromaDbHandler implements VectorHandler {
       await this.client.deleteCollection({ name: collectionId });
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -62,7 +62,7 @@ export class ChromaDbHandler implements VectorHandler {
       return collections;
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -105,7 +105,7 @@ export class ChromaDbHandler implements VectorHandler {
       return vectorId;
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -137,7 +137,7 @@ export class ChromaDbHandler implements VectorHandler {
       await collection.update(updateParams);
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -156,7 +156,7 @@ export class ChromaDbHandler implements VectorHandler {
       await collection.delete({ ids: vectorId });
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -185,7 +185,7 @@ export class ChromaDbHandler implements VectorHandler {
       return count;
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -214,7 +214,7 @@ export class ChromaDbHandler implements VectorHandler {
       };
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
@@ -285,7 +285,7 @@ export class ChromaDbHandler implements VectorHandler {
       return output;
     } catch (err: any) {
       console.log(
-        'Error inserting vector with parameters',
+        'Error operating on chroma with parameters',
         err,
         JSON.stringify(err),
       );
