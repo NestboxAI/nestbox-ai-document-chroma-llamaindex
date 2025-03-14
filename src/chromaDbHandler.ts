@@ -1,4 +1,9 @@
-import { ChromaClient, Collection, IncludeEnum, DefaultEmbeddingFunction } from 'chromadb';
+import {
+  ChromaClient,
+  Collection,
+  IncludeEnum,
+  DefaultEmbeddingFunction,
+} from 'chromadb';
 import { VectorHandler } from 'nestbox-ai-document-base';
 
 const defaultEF = new DefaultEmbeddingFunction();
@@ -11,14 +16,27 @@ export class ChromaDbHandler implements VectorHandler {
     try {
       this.client = new ChromaClient(config || {});
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(`Failed to initialize Chroma client: ${err.message}`);
     }
   }
 
   async createCollection(name: string): Promise<void> {
     try {
-      await this.client.createCollection({ name, embeddingFunction: defaultEF });
+      await this.client.createCollection({
+        name,
+        embeddingFunction: defaultEF,
+      });
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(`Failed to create collection "${name}": ${err.message}`);
     }
   }
@@ -27,6 +45,11 @@ export class ChromaDbHandler implements VectorHandler {
     try {
       await this.client.deleteCollection({ name: collectionId });
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(
         `Failed to delete collection "${collectionId}": ${err.message}`,
       );
@@ -38,10 +61,14 @@ export class ChromaDbHandler implements VectorHandler {
       const collections = await this.client.listCollections();
       return collections;
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(`Failed to list collections: ${err.message}`);
     }
   }
-
 
   async insertVector(
     collectionId: string,
@@ -72,12 +99,16 @@ export class ChromaDbHandler implements VectorHandler {
       if (Object.keys(fullMetadata).length > 0) {
         addParams.metadatas = [fullMetadata];
       }
-      
+
       console.log('Inserting vector with parameters', addParams);
       await collection.add(addParams);
       return vectorId;
     } catch (err: any) {
-      console.log('Error inserting vector with parameters', err, JSON.stringify(err));
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(
         `Failed to insert vector into collection "${collectionId}": ${err.message}`,
       );
@@ -105,6 +136,11 @@ export class ChromaDbHandler implements VectorHandler {
 
       await collection.update(updateParams);
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(
         `Failed to update vector "${vectorId}" in collection "${collectionId}": ${err.message}`,
       );
@@ -119,6 +155,11 @@ export class ChromaDbHandler implements VectorHandler {
       const collection: Collection = await this.getCollection(collectionId);
       await collection.delete({ ids: vectorId });
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(
         `Failed to delete vector "${vectorId}" from collection "${collectionId}": ${err.message}`,
       );
@@ -143,6 +184,11 @@ export class ChromaDbHandler implements VectorHandler {
       await collection.delete({ where: filter });
       return count;
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(
         `Failed to delete vectors by filter in collection "${collectionId}": ${err.message}`,
       );
@@ -167,6 +213,11 @@ export class ChromaDbHandler implements VectorHandler {
         metadata: result.metadatas ? result.metadatas[0] : null,
       };
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(
         `Failed to get vector "${vectorId}" from collection "${collectionId}": ${err.message}`,
       );
@@ -190,7 +241,10 @@ export class ChromaDbHandler implements VectorHandler {
       if (filter) queryParams.where = filter;
       if (include) queryParams.include = include;
 
+      console.log('Performing similarity search with parameters', queryParams);
       const results: any = await collection.query(queryParams);
+      console.log('Results of similarity search', results);
+
       const output: any[] = [];
       if (results.ids && results.ids.length > 0) {
         // If multiple queries were possible, results.ids would be an array of arrays.
@@ -230,6 +284,11 @@ export class ChromaDbHandler implements VectorHandler {
       }
       return output;
     } catch (err: any) {
+      console.log(
+        'Error inserting vector with parameters',
+        err,
+        JSON.stringify(err),
+      );
       throw new Error(
         `Failed to perform similarity search on collection "${collectionId}": ${err.message}`,
       );
@@ -243,4 +302,3 @@ export class ChromaDbHandler implements VectorHandler {
     });
   }
 }
-
