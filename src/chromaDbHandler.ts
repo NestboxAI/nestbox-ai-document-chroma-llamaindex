@@ -75,6 +75,7 @@ export class ChromaDbHandler implements VectorHandler {
       await collection.add(addParams);
       return vectorId;
     } catch (err: any) {
+      console.log('Error inserting vector with parameters', err, JSON.stringify(err));
       throw new Error(
         `Failed to insert vector into collection "${collectionId}": ${err.message}`,
       );
