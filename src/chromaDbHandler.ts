@@ -1,5 +1,7 @@
-import { ChromaClient, Collection, IncludeEnum } from 'chromadb';
+import { ChromaClient, Collection, IncludeEnum, DefaultEmbeddingFunction } from 'chromadb';
 import { VectorHandler } from 'nestbox-ai-document-base';
+
+const defaultEF = new DefaultEmbeddingFunction();
 
 export class ChromaDbHandler implements VectorHandler {
   private client: ChromaClient;
@@ -7,7 +9,7 @@ export class ChromaDbHandler implements VectorHandler {
   constructor(config?: object) {
     // Initialize ChromaClient with given config or default (e.g., local server)
     try {
-      this.client = new ChromaClient(config || {}); // default connects to localhost&#8203;:contentReference[oaicite:17]{index=17}
+      this.client = new ChromaClient(config || {});
     } catch (err: any) {
       throw new Error(`Failed to initialize Chroma client: ${err.message}`);
     }
@@ -15,7 +17,7 @@ export class ChromaDbHandler implements VectorHandler {
 
   async createCollection(name: string): Promise<void> {
     try {
-      await this.client.createCollection({ name });
+      await this.client.createCollection({ name, embeddingFunction: defaultEF });
     } catch (err: any) {
       throw new Error(`Failed to create collection "${name}": ${err.message}`);
     }
@@ -40,6 +42,7 @@ export class ChromaDbHandler implements VectorHandler {
     }
   }
 
+
   async insertVector(
     collectionId: string,
     data: {
@@ -52,9 +55,8 @@ export class ChromaDbHandler implements VectorHandler {
   ): Promise<string> {
     const { id, document, url, type, metadata } = data;
     try {
-      const collection: Collection = await this.client.getCollection({
-        name: collectionId,
-      } as any);
+      const collection: Collection = await this.getCollection(collectionId);
+
       // Generate an ID if not provided
       const vectorId =
         id ?? `vec-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -89,9 +91,8 @@ export class ChromaDbHandler implements VectorHandler {
   ): Promise<void> {
     const { document, url, type, metadata } = data;
     try {
-      const collection: Collection = await this.client.getCollection({
-        name: collectionId,
-      } as any);
+      const collection: Collection = await this.getCollection(collectionId);
+
       // Merge url/type into metadata for update
       const fullMetadata: any = metadata ? { ...metadata } : {};
       if (url) fullMetadata.url = url;
@@ -115,9 +116,7 @@ export class ChromaDbHandler implements VectorHandler {
     vectorId: string,
   ): Promise<void> {
     try {
-      const collection: Collection = await this.client.getCollection({
-        name: collectionId,
-      } as any);
+      const collection: Collection = await this.getCollection(collectionId);
       await collection.delete({ ids: vectorId });
     } catch (err: any) {
       throw new Error(
@@ -131,9 +130,8 @@ export class ChromaDbHandler implements VectorHandler {
     filter: object,
   ): Promise<number> {
     try {
-      const collection: Collection = await this.client.getCollection({
-        name: collectionId,
-      } as any);
+      const collection: Collection = await this.getCollection(collectionId);
+
       // Find all vectors matching the filter to count them
       const results: any = await collection.get({ where: filter });
       const idsToDelete: string[] = results.ids ?? [];
@@ -153,9 +151,8 @@ export class ChromaDbHandler implements VectorHandler {
 
   async getVectorById(collectionId: string, vectorId: string): Promise<any> {
     try {
-      const collection: Collection = await this.client.getCollection({
-        name: collectionId,
-      } as any);
+      const collection: Collection = await this.getCollection(collectionId);
+
       const result: any = await collection.get({
         ids: vectorId,
         include: [IncludeEnum.Documents, IncludeEnum.Metadatas],
@@ -184,9 +181,8 @@ export class ChromaDbHandler implements VectorHandler {
     include?: string[],
   ): Promise<any[]> {
     try {
-      const collection: Collection = await this.client.getCollection({
-        name: collectionId,
-      } as any);
+      const collection: Collection = await this.getCollection(collectionId);
+
       const queryParams: any = {
         queryTexts: [query],
         nResults: topK,
@@ -239,4 +235,12 @@ export class ChromaDbHandler implements VectorHandler {
       );
     }
   }
+
+  private getCollection(collectionId: string): Promise<Collection> {
+    return this.client.getCollection({
+      name: collectionId,
+      embeddingFunction: defaultEF,
+    });
+  }
 }
+
