@@ -24,6 +24,24 @@ export class ChromaDbHandler implements VectorHandler {
       throw new Error(`Failed to initialize Chroma client: ${err.message}`);
     }
   }
+  
+  async createCollection(name: string, metadata: Record<string, any>): Promise<void> {
+      try {
+        await this.client.createCollection({
+          name,
+          metadata,
+          embeddingFunction: defaultEF,
+        });
+      } catch (err: any) {
+        console.log(
+          'Error operating on chroma with parameters',
+          err,
+          JSON.stringify(err),
+        );
+        throw new Error(`Failed to create collection "${name}": ${err.message}`);
+      }
+  
+  }
 
   async getCollection(collectionId: string): Promise<any> {
     const collection = await this._getCollection(collectionId);
@@ -63,21 +81,6 @@ export class ChromaDbHandler implements VectorHandler {
     return data.ids;
   }
 
-  async createCollection(name: string): Promise<void> {
-    try {
-      await this.client.createCollection({
-        name,
-        embeddingFunction: defaultEF,
-      });
-    } catch (err: any) {
-      console.log(
-        'Error operating on chroma with parameters',
-        err,
-        JSON.stringify(err),
-      );
-      throw new Error(`Failed to create collection "${name}": ${err.message}`);
-    }
-  }
 
   async deleteCollection(collectionId: string): Promise<void> {
     try {
