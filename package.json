@@ -14,11 +14,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "@llamaindex/workflow": "^0.0.8",
+    "@llamaindex/readers": "^2.0.8",
     "chromadb": "^1.10.3",
     "chromadb-default-embed": "^2.13.2",
     "dotenv": "^16.4.5",
-    "llamaindex": "^0.8.31",
+    "llamaindex": "^0.9.11",
     "nestbox-ai-document-base": "github:NestboxAI/nestbox-ai-document-base#main",
     "ts-node": "^10.9.2"
   },

@@ -25,6 +25,44 @@ export class ChromaDbHandler implements VectorHandler {
     }
   }
 
+  async getCollection(collectionId: string): Promise<any> {
+    const collection = await this._getCollection(collectionId);
+    return { 
+      name: collectionId, 
+      metadata: collection.metadata,
+      count: collection.count,
+    }; 
+  }
+
+  async updateCollection(
+    previousId: string,
+    collectionId: string,
+    metadata: Record<string, any>,
+  ): Promise<void> {
+    const collection = await this._getCollection(previousId);
+    await collection.modify({ name: collectionId, metadata });
+  }
+
+  async batchInsertVectors(
+    collectionId: string,
+    data: { ids: string[]; documents?: string[]; metadatas?: object[] },
+  ): Promise<string[]> {
+
+    const collection = await this._getCollection(collectionId);
+
+    const result: Record<string, string | number | boolean>[] = data.metadatas?.map(
+      (obj) => Object.fromEntries(Object.entries(obj))
+    );
+    
+    await collection.add({
+      ids: data.ids,
+      documents: data.documents,
+      metadatas: result,
+    });
+
+    return data.ids;
+  }
+
   async createCollection(name: string): Promise<void> {
     try {
       await this.client.createCollection({
@@ -75,23 +113,18 @@ export class ChromaDbHandler implements VectorHandler {
     data: {
       id?: string;
       document?: string;
-      url?: string;
-      type?: string;
       metadata?: object;
     },
   ): Promise<string> {
-    const { id, document, url, type, metadata } = data;
+    const { id, document, metadata } = data;
     try {
-      const collection: Collection = await this.getCollection(collectionId);
+      const collection: Collection = await this._getCollection(collectionId);
 
       // Generate an ID if not provided
       const vectorId =
         id ?? `vec-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-      // Merge url and type into metadata (metadata can be any object)
-      const fullMetadata: any = metadata ? { ...metadata } : {};
-      if (url) fullMetadata.url = url;
-      if (type) fullMetadata.type = type;
+      const fullMetadata = { createdAt: Date.now(), ...metadata };
 
       // Prepare parameters for adding. Only include fields that are present.
       const addParams: any = { ids: [vectorId] };
@@ -100,7 +133,6 @@ export class ChromaDbHandler implements VectorHandler {
         addParams.metadatas = [fullMetadata];
       }
 
-      console.log('Inserting vector with parameters', addParams);
       await collection.add(addParams);
       return vectorId;
     } catch (err: any) {
@@ -118,16 +150,14 @@ export class ChromaDbHandler implements VectorHandler {
   async updateVector(
     collectionId: string,
     vectorId: string,
-    data: { document?: string; url?: string; type?: string; metadata?: object },
+    data: { document?: string; metadata?: object },
   ): Promise<void> {
-    const { document, url, type, metadata } = data;
+    const { document, metadata } = data;
     try {
-      const collection: Collection = await this.getCollection(collectionId);
+      const collection: Collection = await this._getCollection(collectionId);
 
       // Merge url/type into metadata for update
-      const fullMetadata: any = metadata ? { ...metadata } : {};
-      if (url) fullMetadata.url = url;
-      if (type) fullMetadata.type = type;
+      const fullMetadata: any = metadata ? { updatedAt: Date.now(), ...metadata } : {};
 
       const updateParams: any = { ids: vectorId };
       if (document !== undefined) updateParams.documents = document;
@@ -152,7 +182,7 @@ export class ChromaDbHandler implements VectorHandler {
     vectorId: string,
   ): Promise<void> {
     try {
-      const collection: Collection = await this.getCollection(collectionId);
+      const collection: Collection = await this._getCollection(collectionId);
       await collection.delete({ ids: vectorId });
     } catch (err: any) {
       console.log(
@@ -171,7 +201,7 @@ export class ChromaDbHandler implements VectorHandler {
     filter: object,
   ): Promise<number> {
     try {
-      const collection: Collection = await this.getCollection(collectionId);
+      const collection: Collection = await this._getCollection(collectionId);
 
       // Find all vectors matching the filter to count them
       const results: any = await collection.get({ where: filter });
@@ -197,7 +227,7 @@ export class ChromaDbHandler implements VectorHandler {
 
   async getVectorById(collectionId: string, vectorId: string): Promise<any> {
     try {
-      const collection: Collection = await this.getCollection(collectionId);
+      const collection: Collection = await this._getCollection(collectionId);
 
       const result: any = await collection.get({
         ids: vectorId,
@@ -232,7 +262,7 @@ export class ChromaDbHandler implements VectorHandler {
     include?: string[],
   ): Promise<any[]> {
     try {
-      const collection: Collection = await this.getCollection(collectionId);
+      const collection: Collection = await this._getCollection(collectionId);
 
       const queryParams: any = {
         queryTexts: [query],
@@ -295,7 +325,7 @@ export class ChromaDbHandler implements VectorHandler {
     }
   }
 
-  private getCollection(collectionId: string): Promise<Collection> {
+  private _getCollection(collectionId: string): Promise<Collection> {
     return this.client.getCollection({
       name: collectionId,
       embeddingFunction: defaultEF,
