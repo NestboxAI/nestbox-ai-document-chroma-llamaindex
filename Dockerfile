@@ -90,8 +90,7 @@ RUN curl -fsSL https://ollama.com/install.sh | sh
 WORKDIR /app
 
 # Expose the ports that the app and Ollama will use
-EXPOSE 11434
-EXPOSE 80
+EXPOSE 11434 80
 
 # Set environment variables
 ENV OLLAMA_HOST http://0.0.0.0:11434
@@ -99,9 +98,9 @@ ENV OLLAMA_HOST http://0.0.0.0:11434
 # Set to production environment
 ENV NODE_ENV production
 
-# Re-create non-root user for Docker
-RUN groupadd -g 1001 nodejs 
-RUN useradd -m -u 1001 -g nodejs nestjs
+# Recreate non-root user consistently
+RUN groupadd -g 1001 nodejs && \
+    useradd -m -u 1001 -g nodejs nestjs
 
 # Copy only the necessary files
 COPY --chown=nestjs:nodejs --from=build /app/dist dist
@@ -114,7 +113,13 @@ RUN pip install chromadb
 RUN echo "#!/bin/sh\n\
     npm rebuild --verbose sharp\n\
     chroma run &\n\
-    sleep 10\n\
+    ollama serve &\n\
+    sleep 10\n\    
+    for model in $(echo "$MODELS" | tr "|" " "); do\n\
+      ollama pull "$model"\n\
+    done\n\
+    ollama list\n\
+    while ! curl --silent --head --fail ${OLLAMA_HOST} > /dev/null 2>&1; do sleep 1; done\n\
     node dist/index.js" > /app/start.sh && chmod +x /app/start.sh
 
 # Default command to run the setup script
