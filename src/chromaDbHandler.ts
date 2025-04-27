@@ -6,11 +6,11 @@ import {
 } from 'chromadb';
 import { VectorHandler } from 'nestbox-ai-document-base';
 
-const MODEL = process.env.MODELS.split('|')[0] || 'gemma3:27b';
+// const MODEL = process.env.MODELS.split('|')[0] || 'gemma3:27b';
 
 const defaultEF  = new OllamaEmbeddingFunction({
   url: "http://127.0.0.1:11434/",
-  model: MODEL
+  model: 'nomic-embed-text'
 })
 
 export class ChromaDbHandler implements VectorHandler {

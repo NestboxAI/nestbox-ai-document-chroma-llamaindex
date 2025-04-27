@@ -118,6 +118,7 @@ RUN echo "#!/bin/sh\n\
     for model in $(echo "$MODELS" | tr "|" " "); do\n\
       ollama pull "$model"\n\
     done\n\
+    ollama pull nomic-embed-text\n\
     ollama list\n\
     while ! curl --silent --head --fail ${OLLAMA_HOST} > /dev/null 2>&1; do sleep 1; done\n\
     node dist/index.js" > /app/start.sh && chmod +x /app/start.sh
