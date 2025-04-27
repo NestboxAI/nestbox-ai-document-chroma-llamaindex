@@ -2,11 +2,16 @@ import {
   ChromaClient,
   Collection,
   IncludeEnum,
-  DefaultEmbeddingFunction,
+  OllamaEmbeddingFunction,
 } from 'chromadb';
 import { VectorHandler } from 'nestbox-ai-document-base';
 
-const defaultEF = new DefaultEmbeddingFunction();
+const MODEL = process.env.MODELS.split('|')[0] || 'gemma3:27b';
+
+const defaultEF  = new OllamaEmbeddingFunction({
+  url: "http://127.0.0.1:11434/",
+  model: MODEL
+})
 
 export class ChromaDbHandler implements VectorHandler {
   private client: ChromaClient;
