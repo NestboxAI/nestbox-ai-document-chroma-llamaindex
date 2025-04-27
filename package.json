@@ -20,6 +20,7 @@
     "dotenv": "^16.4.5",
     "llamaindex": "^0.9.11",
     "nestbox-ai-document-base": "github:NestboxAI/nestbox-ai-document-base#main",
+    "ollama": "^0.5.15",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
