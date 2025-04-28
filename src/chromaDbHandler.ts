@@ -279,8 +279,10 @@ export class ChromaDbHandler implements VectorHandler {
         return null;
       }
       const collection: Collection = await this._getCollection(collectionId);
+      const isQuesryEngine = query.startsWith('query_engine:');
 
-      if (query.startsWith('question:')) {
+      if (isQuesryEngine) {
+        console.log('Using query engine');
         return await this.queryEngine(
           query.substring(9),
           topK,
@@ -290,6 +292,7 @@ export class ChromaDbHandler implements VectorHandler {
         );
       }
 
+      console.log('Using query search');
       return await this.queryTerm(query, topK, filter, include, collection);
     } catch (err) {
       console.log(
@@ -343,6 +346,8 @@ export class ChromaDbHandler implements VectorHandler {
     const queryEngine = index.asQueryEngine({ retriever, responseSynthesizer, nodePostprocessors, preFilters});
 
     const response = await queryEngine.query({ query, stream: false});
+
+    console.log('Response from query engine', response);
 
     return [ response ]
   }
