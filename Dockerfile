@@ -110,18 +110,19 @@ RUN export GIN_MODE=release
 RUN pip install chromadb
 
 # Setup ollama and run the node service
-RUN echo "#!/bin/sh\n\
+RUN echo '#!/bin/sh\n\
     npm rebuild --verbose sharp\n\
     chroma run &\n\
     ollama serve &\n\
-    sleep 10\n\    
+    sleep 10\n\
     for model in $(echo "$MODELS" | tr "|" " "); do\n\
       ollama pull "$model"\n\
     done\n\
     ollama pull nomic-embed-text\n\
     ollama list\n\
     while ! curl --silent --head --fail ${OLLAMA_HOST} > /dev/null 2>&1; do sleep 1; done\n\
-    node dist/index.js" > /app/start.sh && chmod +x /app/start.sh
+    node dist/index.js'\
+    > /app/start.sh && chmod +x /app/start.sh
 
 # Default command to run the setup script
 CMD ["/app/start.sh"]
