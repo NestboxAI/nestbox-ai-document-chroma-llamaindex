@@ -6,7 +6,7 @@ import {
   IncludeEnum,
   OllamaEmbeddingFunction,
 } from 'chromadb';
-import { MetadataFilters, SimilarityPostprocessor, TreeSummarize, VectorStoreIndex } from 'llamaindex';
+import { MetadataFilters, Settings, SimilarityPostprocessor, TreeSummarize, VectorIndexRetriever, VectorStoreIndex } from 'llamaindex';
 import { VectorHandler } from 'nestbox-ai-document-base';
 
 const MODEL = process.env.MODELS.split('|')[0] || 'gemma3:27b';
@@ -15,6 +15,16 @@ const EMBEDDING_MODEL = 'nomic-embed-text';
 const defaultEF = new OllamaEmbeddingFunction({
   url: 'http://127.0.0.1:11434/',
   model: EMBEDDING_MODEL,
+});
+
+const embeddingModel = new OllamaEmbedding({
+  model: EMBEDDING_MODEL,
+});
+
+Settings.embedModel = embeddingModel;
+
+Settings.llm = new Ollama({
+  model: MODEL,
 });
 
 export class ChromaDbHandler implements VectorHandler {
@@ -284,7 +294,7 @@ export class ChromaDbHandler implements VectorHandler {
       if (isQuesryEngine) {
         console.log('Using query engine');
         return await this.queryEngine(
-          query.substring(9),
+          query.substring(13),
           topK,
           filter,
           include,
@@ -313,9 +323,6 @@ export class ChromaDbHandler implements VectorHandler {
     include: string[],
     collection: Collection,
   ) {
-    const embeddingModel = new OllamaEmbedding({
-      model: EMBEDDING_MODEL,
-    });
 
     // Create Vector Store with LlamaIndex
     const vectorStore = new ChromaVectorStore({
@@ -326,14 +333,9 @@ export class ChromaDbHandler implements VectorHandler {
     // Create index from Vector Store
     const index = await VectorStoreIndex.fromVectorStore(vectorStore);
 
-    const llm = new Ollama({
-      model: MODEL,
-    });
-
-    const retriever = index.asRetriever()
+    const retriever: VectorIndexRetriever = index.asRetriever()
     const preFilters: MetadataFilters = { filters: [], } 
     const responseSynthesizer = new TreeSummarize({
-      llm,
     });
 
     const nodePostprocessors = [
