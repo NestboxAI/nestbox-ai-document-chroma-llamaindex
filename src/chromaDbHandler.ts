@@ -1,30 +1,16 @@
-import { ChromaVectorStore } from '@llamaindex/chroma';
-import { Ollama, OllamaEmbedding } from '@llamaindex/ollama';
 import {
   ChromaClient,
   Collection,
   IncludeEnum,
   OllamaEmbeddingFunction,
 } from 'chromadb';
-import { MetadataFilters, Settings, SimilarityPostprocessor, TreeSummarize, VectorIndexRetriever, VectorStoreIndex } from 'llamaindex';
 import { VectorHandler } from 'nestbox-ai-document-base';
 
-const MODEL = process.env.MODELS.split('|')[0] || 'gemma3:27b';
 const EMBEDDING_MODEL = 'nomic-embed-text';
 
-const defaultEF = new OllamaEmbeddingFunction({
+const DEFAULT_EMBEDDING_FUNCTION = new OllamaEmbeddingFunction({
   url: 'http://127.0.0.1:11434/',
   model: EMBEDDING_MODEL,
-});
-
-const embeddingModel = new OllamaEmbedding({
-  model: EMBEDDING_MODEL,
-});
-
-Settings.embedModel = embeddingModel;
-
-Settings.llm = new Ollama({
-  model: MODEL,
 });
 
 export class ChromaDbHandler implements VectorHandler {
@@ -52,7 +38,7 @@ export class ChromaDbHandler implements VectorHandler {
       await this.client.createCollection({
         name,
         metadata,
-        embeddingFunction: defaultEF,
+        embeddingFunction: DEFAULT_EMBEDDING_FUNCTION,
       });
     } catch (err: any) {
       console.log(
@@ -285,23 +271,7 @@ export class ChromaDbHandler implements VectorHandler {
     include?: string[],
   ): Promise<any[]> {
     try {
-      if (!query) {
-        return null;
-      }
       const collection: Collection = await this._getCollection(collectionId);
-      const isQuesryEngine = query.startsWith('query_engine:');
-
-      if (isQuesryEngine) {
-        console.log('Using query engine');
-        return await this.queryEngine(
-          query.substring(13),
-          topK,
-          filter,
-          include,
-          collection,
-        );
-      }
-
       console.log('Using query search');
       return await this.queryTerm(query, topK, filter, include, collection);
     } catch (err) {
@@ -314,43 +284,6 @@ export class ChromaDbHandler implements VectorHandler {
         `Failed to perform similarity search on collection "${collectionId}": ${err.message}`,
       );
     }
-  }
-
-  private async queryEngine(
-    query: string,
-    topK: number,
-    filters: object,
-    include: string[],
-    collection: Collection,
-  ) {
-
-    // Create Vector Store with LlamaIndex
-    const vectorStore = new ChromaVectorStore({
-      collectionName: collection.name,
-      embeddingModel,
-    });
-
-    // Create index from Vector Store
-    const index = await VectorStoreIndex.fromVectorStore(vectorStore);
-
-    const retriever: VectorIndexRetriever = index.asRetriever()
-    const responseSynthesizer = new TreeSummarize({
-    });
-
-    const nodePostprocessors = [
-      new SimilarityPostprocessor({
-        similarityCutoff: 0.5,
-      })
-    ];
-
-    // Query the index using the LLM
-    const queryEngine = index.asQueryEngine({ retriever, responseSynthesizer, nodePostprocessors });
-
-    const response = await queryEngine.query({ query, stream: false});
-
-    console.log('Response from query engine', response);
-
-    return [ response ]
   }
 
   private async queryTerm(
@@ -368,43 +301,44 @@ export class ChromaDbHandler implements VectorHandler {
     if (include) queryParams.include = include;
 
     console.log('Performing similarity search with parameters', queryParams);
-    const results: any = await collection.query(queryParams);
+    const results = await collection.query(queryParams);
     console.log('Results of similarity search', results);
 
     const output: any[] = [];
-    if (results.ids && results.ids.length > 0) {
-      // If multiple queries were possible, results.ids would be an array of arrays.
-      // We assume a single query (take the first element).
-      const ids = Array.isArray(results.ids[0]) ? results.ids[0] : results.ids;
-      const docs = results.documents
-        ? Array.isArray(results.documents[0])
-          ? results.documents[0]
-          : results.documents
-        : [];
-      const metas = results.metadatas
-        ? Array.isArray(results.metadatas[0])
-          ? results.metadatas[0]
-          : results.metadatas
-        : [];
-      const dists = results.distances
-        ? Array.isArray(results.distances[0])
-          ? results.distances[0]
-          : results.distances
-        : [];
-      const embeds = results.embeddings
-        ? Array.isArray(results.embeddings[0])
-          ? results.embeddings[0]
-          : results.embeddings
-        : [];
-      for (let i = 0; i < ids.length; i++) {
-        output.push({
-          id: ids[i],
-          document: docs[i] ?? null,
-          metadata: metas[i] ?? null,
-          distance: dists[i] ?? null,
-          embedding: embeds[i] ?? null,
-        });
-      }
+    if (!results.ids || !results.ids.length) {
+      return output; // no results
+    }
+    // If multiple queries were possible, results.ids would be an array of arrays.
+    // We assume a single query (take the first element).
+    const ids = Array.isArray(results.ids[0]) ? results.ids[0] : results.ids;
+    const docs = results.documents
+      ? Array.isArray(results.documents[0])
+        ? results.documents[0]
+        : results.documents
+      : [];
+    const metas = results.metadatas
+      ? Array.isArray(results.metadatas[0])
+        ? results.metadatas[0]
+        : results.metadatas
+      : [];
+    const dists = results.distances
+      ? Array.isArray(results.distances[0])
+        ? results.distances[0]
+        : results.distances
+      : [];
+    const embeds = results.embeddings
+      ? Array.isArray(results.embeddings[0])
+        ? results.embeddings[0]
+        : results.embeddings
+      : [];
+    for (let i = 0; i < ids.length; i++) {
+      output.push({
+        id: ids[i],
+        document: docs[i] ?? null,
+        metadata: metas[i] ?? null,
+        distance: dists[i] ?? null,
+        embedding: embeds[i] ?? null,
+      });
     }
     return output;
   }
@@ -412,7 +346,7 @@ export class ChromaDbHandler implements VectorHandler {
   private _getCollection(collectionId: string): Promise<Collection> {
     return this.client.getCollection({
       name: collectionId,
-      embeddingFunction: defaultEF,
+      embeddingFunction: DEFAULT_EMBEDDING_FUNCTION,
     });
   }
 }
