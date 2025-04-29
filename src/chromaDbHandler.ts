@@ -272,7 +272,6 @@ export class ChromaDbHandler implements VectorHandler {
   ): Promise<any[]> {
     try {
       const collection: Collection = await this._getCollection(collectionId);
-      console.log('Using query search');
       return await this.queryTerm(query, topK, filter, include, collection);
     } catch (err) {
       console.log(
