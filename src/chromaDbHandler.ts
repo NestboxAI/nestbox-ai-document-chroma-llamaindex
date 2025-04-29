@@ -334,7 +334,6 @@ export class ChromaDbHandler implements VectorHandler {
     const index = await VectorStoreIndex.fromVectorStore(vectorStore);
 
     const retriever: VectorIndexRetriever = index.asRetriever()
-    const preFilters: MetadataFilters = { filters: [], } 
     const responseSynthesizer = new TreeSummarize({
     });
 
@@ -345,7 +344,7 @@ export class ChromaDbHandler implements VectorHandler {
     ];
 
     // Query the index using the LLM
-    const queryEngine = index.asQueryEngine({ retriever, responseSynthesizer, nodePostprocessors, preFilters});
+    const queryEngine = index.asQueryEngine({ retriever, responseSynthesizer, nodePostprocessors });
 
     const response = await queryEngine.query({ query, stream: false});
 
